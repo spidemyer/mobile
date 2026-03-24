@@ -82,23 +82,24 @@
 ### Estrutura Básica de um aplicativo flutter
 
 #### Árvore de widgets
-    ```mermaid
-    flowchart TD
-    subgraph MaterialApp["MaterialApp"]
-    end
-    subgraph Janelas["Janelas"]
-        StateLess["StateLess"]
-        Statefull["StateFull"]
-    end
-    subgraph Scaffold["Scaffold"]
-        AppBar["Appbar"]
-        Body["Body"]
-        BNBae["BNBar"]
-        Drawer["Drawer"]
-        FAButton["FAButton"]
-        SnackBar["SnackBar"]
-    end
-    MaterialApp --> Janelas
-    Janelas --> Scaffold
+```mermaid
 
-    ```
+    flowchart TD
+        subgraph MaterialApp["MaterialApp"]
+        end
+        subgraph Janelas["Janelas"]
+            StateLess["StateLess"]
+            StateFull["StateFull"]
+        end
+        subgraph Scaffold["Scaffold"]
+            AppBar["Appbar"]
+            Body["Body"]
+            BNBar["BNBar"]
+            Drawer["Drawer"]
+            FAButton["FAButton"]
+            SnackBar["SnackBar"]
+        end
+        MaterialApp --> Janelas
+        Janelas --> Scaffold         
+
+```
