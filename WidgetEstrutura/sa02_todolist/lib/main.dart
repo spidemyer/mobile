@@ -54,7 +54,7 @@ class _ToDoListState extends State<ToDoList> {
             ElevatedButton(
               // botão para adicioanr tarefa
               onPressed: _adicionarTarefa,
-              child: Text("Adicionar Tarefa"),
+              child: Text("Adicioanr Tarefa"),
             ),
             //campo para listar as tarefas
             Expanded(

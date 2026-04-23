@@ -57,7 +57,7 @@ class _ContatoPageState extends State<ContatoPage> {
             SizedBox(height: 20),
             //enviar mensagem
             ElevatedButton(
-              onPressed: () => _enviarMessagem(),
+              onPressed: () => _enviarMenssagem(),
               child: Text("Enviar Mensagem"),
             ),
           ],
