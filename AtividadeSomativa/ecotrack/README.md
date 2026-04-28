@@ -17,6 +17,10 @@ Aplicativo Flutter desenvolvido para auxiliar usuários na gestão de hábitos e
 - **RNF03 - Responsividade:** A interface deve se adaptar corretamente a diferentes tamanhos de tela (smartphones e tablets) usando widgets flexíveis.
 - **RNF04 - Usabilidade:** O tempo de resposta para ações de clique (como concluir hábito) deve ser imperceptível (< 100ms).
 
+### Protótipo
+
+https://www.figma.com/design/kq1Fh35yd2rFMc6knq8uE4/Untitled?node-id=1-231&t=qAkzMLLu01vlowkV-0 
+
 ## 🏗️ Estrutura do Projeto (Arquitetura)
 
 ```text
