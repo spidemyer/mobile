@@ -9,7 +9,7 @@ class TarefaController extends ChangeNotifier{
 
 //atributos
 //lista para armazer as tarefas criadas
-List<Tarefa> _tarefas = []; //atributo privado
+final List<Tarefa> _tarefas = []; //atributo privado
 
 //getter -=-> listar as tarefas (read)
 List<Tarefa> get tarefas => _tarefas;

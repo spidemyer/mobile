@@ -8,7 +8,6 @@
 
  // usar elemento form para validação de campos
 
- import 'dart:collection';
 
 import 'package:flutter/material.dart';
 

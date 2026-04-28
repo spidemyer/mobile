@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:lista_tarefas_provider/controller/tarefa_controller.dart';
 import 'package:lista_tarefas_provider/view/tarefas_page.dart';

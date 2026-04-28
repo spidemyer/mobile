@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:lista_tarefas_provider/controller/tarefa_controller.dart';
 import 'package:lista_tarefas_provider/view/dashboard_page.dart';
 import 'package:provider/provider.dart';
