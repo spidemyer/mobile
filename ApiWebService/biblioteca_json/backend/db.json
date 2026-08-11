@@ -39,5 +39,6 @@
             "returnDate":"2023-06-15",
             "returned": true
         }
-    ]
+    ],
+    "$schema": "./node_modules/json-server/schema.json"
 }
