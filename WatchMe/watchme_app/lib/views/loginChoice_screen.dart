@@ -6,7 +6,7 @@ import 'home_screen.dart';
 
 class LoginChoiceScreen extends StatelessWidget {
   const LoginChoiceScreen({super.key});
-
+  // Tela de escolha entre login, registro ou uso sem login
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;

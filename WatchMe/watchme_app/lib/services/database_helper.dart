@@ -8,13 +8,15 @@ class DatabaseHelper {
   static Database? _database;
 
   DatabaseHelper._init();
-  // Retorna a instância do banco de dados, inicializando se necessário
+
+  // Retorna a instância do banco de dados, inicializando se precisar
   Future<Database> get database async {
     if (_database != null) return _database!;
     _database = await _initDB('watchme.db');
     return _database!;
   }
 
+  // Inicia o banco de dados
   Future<Database> _initDB(String filePath) async {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, filePath);
@@ -26,6 +28,7 @@ class DatabaseHelper {
     );
   }
 
+  // Cria as tabelas do banco de dados
   Future<void> _createDB(Database db, int version) async {
     // Tabela de Favoritos
     await db.execute('''
@@ -51,8 +54,7 @@ class DatabaseHelper {
     ''');
   }
 
-  // --- MÉTODOS DE FAVORITOS ---
-
+// método para gerenciar os favoritos
   Future<void> addFavorite(Movie movie, String userId) async {
     final db = await instance.database;
     await db.insert(
@@ -62,6 +64,7 @@ class DatabaseHelper {
     );
   }
 
+  // Remover filme dos favoritos
   Future<void> removeFavorite(int movieId, String userId) async {
     final db = await instance.database;
     await db.delete(
@@ -71,6 +74,7 @@ class DatabaseHelper {
     );
   }
 
+  // Verifica se está nos favoritos
   Future<bool> isFavorite(int movieId, String userId) async {
     final db = await instance.database;
     final maps = await db.query(
@@ -81,6 +85,7 @@ class DatabaseHelper {
     return maps.isNotEmpty;
   }
 
+  // Retorna a lista de filmes favoritos do usuário
   Future<List<Movie>> getFavorites(String userId) async {
     final db = await instance.database;
     final result = await db.query(
@@ -91,13 +96,15 @@ class DatabaseHelper {
     return result.map((map) => Movie.fromMap(map)).toList();
   }
 
-  // --- MÉTODOS DE AVALIAÇÕES ---
+
+//métodos para gerenciar as avaliações
 
   Future<void> addReview(Review review) async {
     final db = await instance.database;
     await db.insert('reviews', review.toMap());
   }
 
+  // Retorna a lista de avaliações do usuário
   Future<List<Review>> getReviews(String userId) async {
     final db = await instance.database;
     final result = await db.query(
@@ -106,5 +113,26 @@ class DatabaseHelper {
       whereArgs: [userId],
     );
     return result.map((map) => Review.fromMap(map)).toList();
+  }
+
+  // Atualiza uma avaliação existente
+  Future<int> updateReview(Review review) async {
+    final db = await instance.database;
+    return await db.update(
+      'reviews',
+      review.toMap(),
+      where: 'id = ?',
+      whereArgs: [review.id],
+    );
+  }
+
+  // Exclui uma avaliação pelo ID
+  Future<int> deleteReview(int id) async {
+    final db = await instance.database;
+    return await db.delete(
+      'reviews',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
   }
 }

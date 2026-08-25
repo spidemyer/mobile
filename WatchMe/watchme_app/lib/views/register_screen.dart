@@ -9,7 +9,7 @@ class RegisterScreen extends StatefulWidget {
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
 }
-
+// Tela de registro para novos usuários
 class _RegisterScreenState extends State<RegisterScreen> {
   final _userController = TextEditingController();
   final _emailController = TextEditingController();
@@ -24,7 +24,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       );
       return;
     }
-
+// Salva o usuário e o e-mail com o shared preferences
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('user_$email', username);
     await prefs.setString('currentUser', username);

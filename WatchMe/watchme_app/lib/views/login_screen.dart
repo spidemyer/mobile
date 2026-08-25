@@ -9,25 +9,25 @@ class LoginScreen extends StatefulWidget {
   @override
   State<LoginScreen> createState() => _LoginScreenState();
 }
-
+ // Tela de login para usuários existentes
 class _LoginScreenState extends State<LoginScreen> {
   final _userController = TextEditingController();
   final _emailController = TextEditingController();
-
+  // Método para lidar com o login do usuário
   void _handleLogin() async {
     final username = _userController.text.trim();
     final email = _emailController.text.trim();
-
+  // Verifica se os campos de usuário e e-mail estão preenchidos
     if (username.isEmpty || email.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Preencha os dados de acesso.')),
       );
       return;
     }
-
+  // Salva o usuário atual nas preferências compartilhadas
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('currentUser', username);
-
+  // Navega para a tela inicial do aplicativo após o login bem-sucedido
     if (mounted) {
       Navigator.pushAndRemoveUntil(
         context,

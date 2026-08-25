@@ -15,7 +15,7 @@ class Review {
     required this.posterPath,
     required this.rating,
     required this.comment,
-    required this.userId,
+    required this.userId, required username,
   });
 
   Map<String, dynamic> toMap() {
@@ -38,7 +38,9 @@ class Review {
       posterPath: map['posterPath'],
       rating: (map['rating'] as num).toDouble(),
       comment: map['comment'],
-      userId: map['userId'],
+      userId: map['userId'], username: null,
     );
   }
+
+  get username => null;
 }

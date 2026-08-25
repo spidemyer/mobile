@@ -15,7 +15,7 @@ class ProfileScreen extends StatefulWidget {
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
 }
-
+// Tela de perfil do usuário, exibindo informações, avaliações e favoritos
 class _ProfileScreenState extends State<ProfileScreen> {
   List<Movie> _favorites = [];
   List<Review> _reviews = [];
@@ -25,7 +25,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.initState();
     _loadProfileData();
   }
-
+// Carrega os dados do perfil do usuário, incluindo favoritos e avaliações
   Future<void> _loadProfileData() async {
     final favs = await DatabaseHelper.instance.getFavorites(widget.username);
     final revs = await DatabaseHelper.instance.getReviews(widget.username);
@@ -35,7 +35,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _reviews = revs;
     });
   }
-
+// Método para lidar com o logout do usuário, removendo o usuário atual das preferências compartilhadas e redirecionando para a tela de escolha de login
   void _logout() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('currentUser');
@@ -48,7 +48,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       );
     }
   }
-
+// Método para remover um filme dos favoritos do usuário, atualizando a lista de favoritos e exibindo uma mensagem de confirmação
   Future<void> _removeFavorite(int movieId) async {
     await DatabaseHelper.instance.removeFavorite(movieId, widget.username);
     _loadProfileData();
@@ -57,6 +57,108 @@ class _ProfileScreenState extends State<ProfileScreen> {
         const SnackBar(content: Text('Filme removido dos favoritos!')),
       );
     }
+  }
+
+  Future<void> _deleteReview(int reviewId) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Excluir Avaliação'),
+        content: const Text('Tem certeza que deseja excluir esta avaliação?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Excluir', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      if (!mounted) return;
+      final messenger = ScaffoldMessenger.of(context);
+      await DatabaseHelper.instance.deleteReview(reviewId);
+      _loadProfileData();
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Avaliação excluída com sucesso!')),
+      );
+    }
+  }
+// Método para editar a avaliação do filme, deixando editar a pontuação e o comentário
+  Future<void> _showEditReviewDialog(Review review) async {
+    final commentController = TextEditingController(text: review.comment);
+    double rating = review.rating;
+
+    await showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: Text('Editar: ${review.movieTitle}'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Nota: ${rating.toStringAsFixed(1)} ⭐'),
+              Slider(
+                value: rating,
+                min: 0,
+                max: 5,
+                divisions: 10,
+                label: rating.toStringAsFixed(1),
+                onChanged: (val) {
+                  setDialogState(() {
+                    rating = val;
+                  });
+                },
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: commentController,
+                decoration: const InputDecoration(
+                  labelText: 'Comentário',
+                  border: OutlineInputBorder(),
+                ),
+                maxLines: 3,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancelar'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final navigator = Navigator.of(ctx);
+                final messenger = ScaffoldMessenger.of(context);
+
+                final updatedReview = Review(
+                  id: review.id,
+                  username: review.username,
+                  movieId: review.movieId,
+                  movieTitle: review.movieTitle,
+                  posterPath: review.posterPath,
+                  rating: rating,
+                  comment: commentController.text, userId: '',
+                );
+
+                await DatabaseHelper.instance.updateReview(updatedReview);
+                _loadProfileData();
+
+                navigator.pop();
+                messenger.showSnackBar(
+                  const SnackBar(content: Text('Avaliação atualizada!')),
+                );
+              },
+              child: const Text('Salvar'),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildPlaceholder() {
@@ -70,6 +172,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  Widget _buildMiniPlaceholder() {
+    return Container(
+      width: 45,
+      height: 65,
+      color: Colors.white10,
+      child: const Icon(Icons.movie, size: 20, color: Colors.white38),
+    );
+  }
+//estilização de widget feita com IA para otimizar o tempo.
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -152,11 +263,61 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         separatorBuilder: (context, index) => const Divider(),
                         itemBuilder: (context, index) {
                           final rev = _reviews[index];
+                          final posterUrl = TmdbService.getImageUrl(rev.posterPath);
+
                           return ListTile(
-                            contentPadding: EdgeInsets.zero,
+                            contentPadding: const EdgeInsets.symmetric(vertical: 4),
+                            leading: ClipRRect(
+                              borderRadius: BorderRadius.circular(6),
+                              child: posterUrl.isNotEmpty
+                                  ? Image.network(
+                                      posterUrl,
+                                      width: 45,
+                                      height: 65,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (context, error, stackTrace) => _buildMiniPlaceholder(),
+                                    )
+                                  : _buildMiniPlaceholder(),
+                            ),
                             title: Text(rev.movieTitle, style: const TextStyle(fontWeight: FontWeight.bold)),
                             subtitle: Text(rev.comment),
-                            trailing: Text('⭐ ${rev.rating.toStringAsFixed(1)}'),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text('⭐ ${rev.rating.toStringAsFixed(1)}'),
+                                PopupMenuButton<String>(
+                                  onSelected: (value) {
+                                    if (value == 'edit') {
+                                      _showEditReviewDialog(rev);
+                                    } else if (value == 'delete' && rev.id != null) {
+                                      _deleteReview(rev.id!);
+                                    }
+                                  },
+                                  itemBuilder: (context) => [
+                                    const PopupMenuItem(
+                                      value: 'edit',
+                                      child: Row(
+                                        children: [
+                                          Icon(Icons.edit, size: 20),
+                                          SizedBox(width: 8),
+                                          Text('Editar'),
+                                        ],
+                                      ),
+                                    ),
+                                    const PopupMenuItem(
+                                      value: 'delete',
+                                      child: Row(
+                                        children: [
+                                          Icon(Icons.delete, color: Colors.red, size: 20),
+                                          SizedBox(width: 8),
+                                          Text('Excluir', style: TextStyle(color: Colors.red)),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
                           );
                         },
                       ),
@@ -202,7 +363,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                           )
                                         : _buildPlaceholder(),
                                   ),
-                                  // Botão no canto da imagem para remover dos favoritos
                                   Positioned(
                                     top: 4,
                                     right: 4,

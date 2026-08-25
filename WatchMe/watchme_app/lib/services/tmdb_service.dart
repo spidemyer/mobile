@@ -1,23 +1,23 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/movie.dart';
-
+// Serviço para interagir com a API do TMDB
 class TmdbService {
   static const String _baseUrl = 'https://api.themoviedb.org/3';
   
-  // COLOQUE SUA CHAVE DE API DO TMDB AQUI:
+  // chave da API
   static const String _apiKey = 'ed3b799b395587e59c236d8e8fae2675';
 
   // Retorna a URL completa da imagem
   static String getImageUrl(String? posterPath) {
   if (posterPath == null || posterPath.isEmpty || posterPath == 'null') {
-    // Retorna uma imagem genérica de placeholder
+    // Retorna uma imagem genérica de placeholder caso o filme não tenha uma capa
     return 'https://via.placeholder.com/500x750/1e293b/ffffff?text=Sem+Poster';
   }
   return 'https://image.tmdb.org/t/p/w500$posterPath';
 }
 
-  // Busca filmes populares para popular a tela inicial
+  // Busca filmes populares para mostrar na tela
   static Future<List<Movie>> getPopularMovies() async {
     final url = Uri.parse('$_baseUrl/movie/popular?api_key=$_apiKey&language=pt-BR');
     try {
@@ -34,7 +34,7 @@ class TmdbService {
     }
   }
 
-  // Busca filmes por nome (Query Param)
+  // Busca filmes por nome
   static Future<List<Movie>> searchMovies(String query) async {
     if (query.trim().isEmpty) {
       return getPopularMovies();
@@ -42,7 +42,7 @@ class TmdbService {
     final url = Uri.parse(
       '$_baseUrl/search/movie?api_key=$_apiKey&query=${Uri.encodeComponent(query)}&language=pt-BR',
     );
-    try {
+    try { 
       final response = await http.get(url);
       if (response.statusCode == 200) {
         final data = json.decode(response.body);

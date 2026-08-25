@@ -64,7 +64,6 @@ lib/
 ├── services/
 │   ├── database_helper.dart   # Gerenciador do banco de dados SQLite (Favoritos e Reviews)
 │   ├── tmdb_service.dart      # Integração HTTP com a API do TMDB
-│   └── user_session.dart      # Gerenciamento da sessão local do usuário via SharedPreferences
 └── views/
     ├── home_screen.dart         # Grid de filmes, busca e modal de avaliações
     ├── loginChoice_screen.dart  # Tela inicial (Entrar, Criar Conta ou Entrar como Visitante)
@@ -89,7 +88,7 @@ lib/
 1. **Clonar o repositório:**
 
 ```bash
-git clone [https://github.com/seu-usuario/watchme.git](https://github.com/seu-usuario/watchme.git)
+git clone [https://github.com/spidemyer/mobile/tree/af551c506e2c09d2782dc87e4003e393954117a9/WatchMe/watchme_app]
 cd watchme
 
 ```

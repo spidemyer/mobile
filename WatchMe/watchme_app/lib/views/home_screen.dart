@@ -7,6 +7,7 @@ import '../services/database_helper.dart';
 import '../main.dart';
 import 'profile_screen.dart';
 
+//tela principal 
 class HomeScreen extends StatefulWidget {
   final String username;
 
@@ -27,19 +28,19 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _loadInitialData();
   }
-
+  // carrega os filmes populares e os favoritos do usuario
   Future<void> _loadInitialData() async {
     setState(() => _isLoading = true);
     final movies = await TmdbService.getPopularMovies();
     final favs = await DatabaseHelper.instance.getFavorites(widget.username);
-
+  // atualiza o estado com os filmes e favoritos carregados
     setState(() {
       _movies = movies;
       _favoriteIds = favs.map((m) => m.id).toSet();
       _isLoading = false;
     });
   }
-
+  //método para realizar a busca de filmes
   void _onSearch(String query) async {
     setState(() => _isLoading = true);
     final results = await TmdbService.searchMovies(query);
@@ -54,7 +55,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final isGuest = widget.username.isEmpty ||
         widget.username.toLowerCase() == 'visitante' ||
         widget.username.toLowerCase() == 'guest';
-
+  // se for visitante, exibe um alerta para criar perfil e manda para a tela de login
     if (isGuest) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -77,7 +78,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
     return false;
   }
-
+  // método para alternar o estado de favorito de um filme
   void _toggleFavorite(Movie movie) async {
     if (_checkIsGuestAndAlert('salvar favoritos')) return;
 
@@ -92,10 +93,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _showRatingModal(Movie movie) {
     if (_checkIsGuestAndAlert('avaliar filmes')) return;
-
+  // Variável para armazenar a classificação selecionada e o comentário
     double selectedRating = 5.0;
     final commentController = TextEditingController();
-
+  // Exibe o modal para avaliação do filme
+  //estilização feita com a IA para otimizar meu tempo
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -149,7 +151,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           posterPath: movie.posterPath,
                           rating: selectedRating,
                           comment: commentController.text,
-                          userId: widget.username,
+                          userId: widget.username, username: null,
                         );
                         await DatabaseHelper.instance.addReview(review);
                         if (mounted) {
@@ -170,7 +172,7 @@ class _HomeScreenState extends State<HomeScreen> {
       },
     );
   }
-
+  // método para exibir um placeholder quando não houver imagem do filme
   Widget _buildPlaceholder() {
     return Container(
       color: Theme.of(context).colorScheme.surface,
@@ -307,9 +309,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                             backgroundColor: Colors.black54,
                                             radius: 14,
                                             child: Icon(
-                                              Icons.outlined_flag,
+                                              isFav ? Icons.star : Icons.star_border,
                                               size: 16,
-                                              color: isFav ? Colors.red : Colors.white,
+                                              color: isFav ? Colors.amber : Colors.white,
                                             ),
                                           ),
                                         ),

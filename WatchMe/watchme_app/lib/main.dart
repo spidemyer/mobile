@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:watchme_app/views/loginChoice_screen.dart';
-import 'views/loginChoice_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(const WatchMeApp());
 }
 
-// ValueNotifier global para gerenciar o modo Claro/Escuro em tempo real
+// modo de tema inicial definido como escuro, mas pode ser alternado pelo usuário
 final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.dark);
 
 class WatchMeApp extends StatelessWidget {
