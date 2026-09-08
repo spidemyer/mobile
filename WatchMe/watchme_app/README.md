@@ -8,9 +8,24 @@ O **WatchMe** é uma aplicação mobile desenvolvida em Flutter para busca, aval
 
 * **Catálogo e Busca**: Consulta em tempo real de filmes populares e busca personalizada com tratamento de *query params*.
 * **Persistência de Favoritos**: Armazenamento local de dados (ID, título, poster) utilizando banco de dados relacional SQLite.
-* **Avaliações Pessoais**: Atribuição de notas (1 a 5 estrelas) e comentários salvos localmente.
+* **Ciclo Completo de Avaliações (CRUD)**:
+* **Create**: Atribuição de notas (0.0 a 5.0 estrelas) e comentários via modal na tela inicial.
+* **Read**: Visualização do histórico de avaliações no perfil.
+* **Update**: Edição de notas e comentários de avaliações já realizadas.
+* **Delete**: Remoção de avaliações diretamente pelo perfil.
+
+
 * **Gerenciamento de Perfil**: Estatísticas do usuário (quantidade de favoritos e avaliações) e suporte a login/modo visitante.
 * **Tema Dinâmico**: Suporte nativo e alternância em tempo real entre modo Claro e Escuro (*Light/Dark Theme*).
+
+---
+
+## 🛠️ Tecnologias e Dependências
+
+* **[Flutter](https://flutter.dev/)** / **[Dart](https://dart.dev/)**: Framework e linguagem base do projeto.
+* **[http](https://pub.dev/packages/http)**: Consumo de endpoints REST da API do TMDB.
+* **[sqflite](https://pub.dev/packages/sqflite)** & **[path](https://pub.dev/packages/path)**: Criação e manipulação do banco de dados relacional local (SQLite).
+* **[shared_preferences](https://pub.dev/packages/shared_preferences)**: Armazenamento de dados simples em chave-valor (sessão do usuário e preferências de tema).
 
 ---
 
@@ -63,9 +78,9 @@ lib/
 │   └── review.dart            # Modelo de dados de avaliações do usuário
 ├── services/
 │   ├── database_helper.dart   # Gerenciador do banco de dados SQLite (Favoritos e Reviews)
-│   ├── tmdb_service.dart      # Integração HTTP com a API do TMDB
+│   └── tmdb_service.dart      # Integração HTTP com a API do TMDB
 └── views/
-    ├── home_screen.dart         # Grid de filmes, busca e modal de avaliações
+    ├── home_screen.dart        # Grid de filmes, busca e modal de avaliações
     ├── loginChoice_screen.dart  # Tela inicial (Entrar, Criar Conta ou Entrar como Visitante)
     ├── login_screen.dart        # Tela de formulário de login
     ├── profile_screen.dart      # Perfil do usuário com estatísticas, avaliações e favoritos
@@ -75,7 +90,15 @@ lib/
 
 ---
 
-## 🛠️ Configuração e Execução
+## 📱 Screenshots
+
+| Tela Inicial | Avaliação de Filme | Perfil do Usuário |
+| --- | --- | --- |
+| *(Adicione a imagem 1)* | *(Adicione a imagem 2)* | *(Adicione a imagem 3)* |
+
+---
+
+## ⚙️ Configuração e Execução
 
 ### Pré-requisitos
 
@@ -88,7 +111,7 @@ lib/
 1. **Clonar o repositório:**
 
 ```bash
-git clone [https://github.com/spidemyer/mobile/tree/af551c506e2c09d2782dc87e4003e393954117a9/WatchMe/watchme_app]
+git clone https://github.com/spidemyer/mobile/tree/af551c506e2c09d2782dc87e4003e393954117a9/WatchMe/watchme_app
 cd watchme
 
 ```
@@ -127,15 +150,11 @@ sequenceDiagram
     participant DB as DatabaseHelper
     participant SQLite as SQLite (watchme.db)
 
-    User->>View: Clica no ícone de Bandeira (Favoritar)
+    User->>View: Clica no ícone de Estrela (Favoritar)
     View->>DB: addFavorite(movie, userId)
     DB->>SQLite: INSERT INTO favorites VALUES(...)
     SQLite-->>DB: Retorna confirmação de inserção
-    DB-->>View: Atualiza o estado
-    View-->>User: Altera o ícone para marcado
-
-```
-
-```
+    DB-->>View: Retorna confirmação da operação
+    View-->>User: Atualiza o estado e altera o ícone para preenchido
 
 ```
