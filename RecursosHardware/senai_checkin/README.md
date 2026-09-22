@@ -47,6 +47,7 @@ O projeto está organizado de forma modular, facilitando a manutenção e a esca
 3. **`ListaRegistrosScreen` (Histórico de Check-ins):**
 * Consulta assíncrona ao banco de dados local.
 * Exibe em formato de lista os registros salvos, contendo a miniatura da foto, data/hora, observação e coordenadas geográficas resumidas.
+* Permite a edição e exclusão de registros já cadastrados.
 
 ---
 

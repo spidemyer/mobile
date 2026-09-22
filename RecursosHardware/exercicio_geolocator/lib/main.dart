@@ -2,7 +2,6 @@
 
 import 'package:exercicio_geolocator/api_service.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:geolocator/geolocator.dart';
 
 void main(List<String> args) {
