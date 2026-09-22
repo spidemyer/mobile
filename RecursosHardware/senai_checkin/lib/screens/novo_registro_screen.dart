@@ -6,9 +6,8 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:google_fonts/google_fonts.dart'; // Fonte estilizada
 import '../database/database_helper.dart';
 import '../models/checkin_model.dart';
-import 'mapa_screen.dart';
 
-//tela de novo registro, onde as apis estão sendo utilizadas
+// Tela de novo registro, onde as APIs estão sendo utilizadas
 class NovoRegistroScreen extends StatefulWidget {
   const NovoRegistroScreen({super.key});
 
@@ -16,11 +15,8 @@ class NovoRegistroScreen extends StatefulWidget {
   State<NovoRegistroScreen> createState() => _NovoRegistroScreenState();
 }
 
-// Tela de Novo Registro, usei a IA para auxiliar e agilizar o processo de estilização das telas, para manter um padrão.
 class _NovoRegistroScreenState extends State<NovoRegistroScreen> {
   final TextEditingController _obsController = TextEditingController();
-  final TextEditingController _mapaController =
-      TextEditingController(); // Controlador para o campo de mapa
   File? _imageFile;
   Position? _currentPosition;
   bool _isLoading = false;
@@ -30,8 +26,6 @@ class _NovoRegistroScreenState extends State<NovoRegistroScreen> {
   final Color lightPurple = const Color(0xFFE1BEE7);
   final Color backgroundLight = const Color(0xFFF3E5F5);
   final Color darkPurpleText = const Color(0xFF4A148C);
-
-  get resultado => null;
 
   Future<bool> _verificarPermissoes() async {
     var cameraStatus = await Permission.camera.request();
@@ -56,6 +50,7 @@ class _NovoRegistroScreenState extends State<NovoRegistroScreen> {
   Future<void> _obterLocalizacao() async {
     bool serviceEnabled;
     LocationPermission permission;
+    
     // Verifica se o serviço de localização está habilitado
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
@@ -69,6 +64,7 @@ class _NovoRegistroScreenState extends State<NovoRegistroScreen> {
       );
       return;
     }
+
     // Verifica as permissões de localização
     permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
@@ -77,6 +73,7 @@ class _NovoRegistroScreenState extends State<NovoRegistroScreen> {
     }
 
     if (permission == LocationPermission.deniedForever) return;
+
     // Obtém a posição atual do dispositivo
     setState(() => _isLoading = true);
     try {
@@ -85,7 +82,6 @@ class _NovoRegistroScreenState extends State<NovoRegistroScreen> {
       );
       setState(() {
         _currentPosition = position;
-        _mapaController.text = "${position.latitude}, ${position.longitude}";
       });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -125,6 +121,7 @@ class _NovoRegistroScreenState extends State<NovoRegistroScreen> {
       );
       return;
     }
+
     // Cria um novo registro de check-in com os dados coletados
     final novoRegistro = CheckInModel(
       dataHora: DateTime.now().toString().substring(0, 19),
@@ -135,6 +132,7 @@ class _NovoRegistroScreenState extends State<NovoRegistroScreen> {
           : _obsController.text,
       caminhoFoto: _imageFile!.path,
     );
+
     // Insere o novo registro no banco de dados
     await DatabaseHelper.instance.insertRegistro(novoRegistro);
 
@@ -163,7 +161,6 @@ class _NovoRegistroScreenState extends State<NovoRegistroScreen> {
     });
   }
 
-  // Constrói a interface do usuário da tela de novo registro
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -270,41 +267,6 @@ class _NovoRegistroScreenState extends State<NovoRegistroScreen> {
                     ),
                   ),
                 ],
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            // Novo Campo integrado para acessar o Mapa
-            TextField(
-              controller: _mapaController,
-              readOnly: true,
-              style: GoogleFonts.roboto(color: Colors.black87),
-              decoration: InputDecoration(
-                labelText: 'Localização no Mapa',
-                labelStyle: GoogleFonts.poppins(color: primaryPurple),
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide.none,
-                ),
-                prefixIcon: Icon(Icons.map_rounded, color: primaryPurple),
-                suffixIcon: IconButton(
-                  icon: Icon(Icons.pin_drop, color: primaryPurple),
-                  onPressed: () async {
-                    await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const MapaScreen(),
-                      ),
-                    );
-                    if (resultado != null) {
-                      setState(() {
-                        _mapaController.text = resultado.toString();
-                      });
-                    }
-                  },
-                ),
               ),
             ),
             const SizedBox(height: 20),

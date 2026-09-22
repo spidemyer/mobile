@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'novo_registro_screen.dart';
-import 'mapa_screen.dart';
 import 'lista_registros_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
-  //definição da paleta de cores do app
+
   @override
   Widget build(BuildContext context) {
-    // Definindo a paleta de cores (Roxo Claro / Lavanda)
+    // Definindo a paleta de cores (Roxo Claro)
     const Color primaryPurple = Color(0xFF9C27B0);
     const Color lightPurple = Color(0xFFE1BEE7);
     const Color backgroundLight = Color(0xFFF3E5F5);
     const Color darkPurpleText = Color(0xFF4A148C);
-    //parte de edição da tela, usei a IA para agilizar esse processo, mas fiz algumas alterações para deixar mais clean e com cores mais agradáveis
+    
+// Tela Inicial do App, usei a IA para auxiliar e agilizar o processo de estilização das telas, para manter um padrão.
     return Scaffold(
       backgroundColor: backgroundLight,
       appBar: AppBar(
@@ -38,8 +38,10 @@ class HomeScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
+                // ignore: deprecated_member_use
                 color: lightPurple.withOpacity(0.5),
                 borderRadius: BorderRadius.circular(20),
+                // ignore: deprecated_member_use
                 border: Border.all(color: primaryPurple.withOpacity(0.3)),
               ),
               child: Column(
@@ -55,7 +57,7 @@ class HomeScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Gerencie seus check-ins e visualize as localizações do SENAI de forma rápida e prática.',
+                    'Gerencie seus check-ins e visualize seus registros salvos de forma rápida e prática.',
                     style: GoogleFonts.roboto(
                       fontSize: 14,
                       color: Colors.grey[800],
@@ -91,7 +93,7 @@ class HomeScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // Botão / Card: Histórico / Registros Cadastrados (NOVO)
+            // Botão / Card: Histórico / Registros Cadastrados
             _buildMenuCard(
               context,
               icon: Icons.list_alt_rounded,
@@ -101,20 +103,6 @@ class HomeScreen extends StatelessWidget {
               onTap: () {
                 // Navegar para a tela de listagem de registros:
                 Navigator.push(context, MaterialPageRoute(builder: (context) => const ListaRegistrosScreen()));
-              },
-            ),
-            const SizedBox(height: 16),
-
-            // Botão / Card: Visualizar Mapa
-            _buildMenuCard(
-              context,
-              icon: Icons.map_rounded,
-              title: 'Ver Mapa do SENAI',
-              subtitle: 'Acessar unidades e pontos de interesse',
-              primaryColor: primaryPurple,
-              onTap: () {
-                // Navegar para a tela do Mapa:
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const MapaScreen()));
               },
             ),
           ],
