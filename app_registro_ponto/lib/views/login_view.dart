@@ -96,10 +96,10 @@ class _LoginViewState extends State<LoginView> {
           children: [
             TextField(
               controller: _emailController,
-              keyboardType: TextInputType.emailAddress,
+              keyboardType: TextInputType.text,
               textInputAction: TextInputAction.next,
               decoration: const InputDecoration(
-                labelText: 'E-mail',
+                labelText: 'E-mail ou NIF',
                 prefixIcon: Icon(Icons.email_outlined),
               ),
             ),

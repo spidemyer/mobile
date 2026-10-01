@@ -58,6 +58,7 @@ flutterfire --version
 4. Em **Sign-in method**, ative o provedor **E-mail/senha**.
 5. Crie um usuário de teste em **Authentication > Users**.
 6. Crie o banco **Cloud Firestore** em modo de teste durante o desenvolvimento.
+7. Para login por NIF, crie a coleção `usuarios` com documentos contendo `nif` e `email`.
 
 ### 2. Conectar o Flutter ao Firebase
 
@@ -179,7 +180,7 @@ Revise as regras com cuidado antes de usar o aplicativo em produção.
 
 ## Limitações atuais
 
-- O login aceita e-mail. Para aceitar NIF, é necessário criar uma camada no backend que converta o NIF para o e-mail do usuário sem expor dados de outras pessoas.
+- O login por NIF depende da coleção `usuarios`, que deve ser protegida pelas regras do Firestore.
 - As coordenadas da empresa ainda precisam ser configuradas para o endereço real.
 - Ainda não existe uma tela de criação de usuários; eles devem ser cadastrados pelo Firebase Console.
 - O teste automatizado atual cobre a conversão do modelo para o formato salvo no Firestore.

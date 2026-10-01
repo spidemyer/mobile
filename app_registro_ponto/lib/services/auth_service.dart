@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -8,14 +9,36 @@ class AuthService {
 
   Future<User?> signInWithEmail(String email, String password) async {
     try {
+      final emailParaLogin = await _resolveEmail(email);
       final credential = await _auth.signInWithEmailAndPassword(
-        email: email,
+        email: emailParaLogin,
         password: password,
       );
       return credential.user;
     } on FirebaseAuthException catch (e) {
       throw Exception(_messageForCode(e.code));
     }
+  }
+
+  Future<String> _resolveEmail(String identifier) async {
+    final value = identifier.trim();
+    if (value.contains('@')) return value;
+
+    final result = await FirebaseFirestore.instance
+        .collection('usuarios')
+        .where('nif', isEqualTo: value)
+        .limit(1)
+        .get();
+
+    if (result.docs.isEmpty) {
+      throw Exception('NIF ou senha inválidos.');
+    }
+
+    final email = result.docs.first.data()['email']?.toString();
+    if (email == null || email.isEmpty) {
+      throw Exception('NIF ou senha inválidos.');
+    }
+    return email;
   }
 
   String _messageForCode(String code) {

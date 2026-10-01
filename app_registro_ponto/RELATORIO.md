@@ -10,7 +10,7 @@ O projeto atende ao uso de recursos de hardware por meio da biometria e da local
 
 ### Autenticação
 
-A autenticação por e-mail e senha é feita pelo Firebase Authentication em `lib/services/auth_service.dart`. A sessão é observada com `authStateChanges()` em `lib/main.dart`, permitindo que o aplicativo abra diretamente a tela adequada quando o usuário já estiver autenticado.
+A autenticação por e-mail ou NIF e senha é feita pelo Firebase Authentication em `lib/services/auth_service.dart`. Quando o identificador não contém `@`, o serviço procura o e-mail associado na coleção `usuarios`. A sessão é observada com `authStateChanges()` em `lib/main.dart`, permitindo que o aplicativo abra diretamente a tela adequada quando o usuário já estiver autenticado.
 
 A biometria é usada em dois momentos: como acesso alternativo depois do primeiro login com senha e como confirmação adicional antes de cada registro de ponto. Essa segunda confirmação reduz o risco de registrar um ponto sem a presença do usuário.
 
@@ -84,7 +84,7 @@ Em um emulador, é necessário simular uma localização próxima das coordenada
 
 ## 7. Segurança e limitações
 
-As regras do Firestore devem exigir autenticação e comparar `userId` com `request.auth.uid`. O login atual usa e-mail; o suporte a NIF exige uma camada no backend que faça a associação segura entre NIF e e-mail.
+As regras do Firestore devem exigir autenticação e comparar `userId` com `request.auth.uid`. A coleção `usuarios` também precisa de regras que evitem a leitura de dados de outros funcionários; em uma aplicação real, essa conversão deve ser feita por uma função backend.
 
 As coordenadas de exemplo devem ser substituídas pelas coordenadas reais da empresa antes da apresentação. O cadastro de novos usuários ainda é feito pelo Firebase Console.
 

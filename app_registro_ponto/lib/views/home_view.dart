@@ -71,6 +71,7 @@ class _HomeViewState extends State<HomeView> {
           distanciaMetros: distancia,
         );
         await _firebaseService.salvarPonto(ponto);
+        if (!mounted) return;
         setState(() {
           _statusMessage = 'Ponto registrado com sucesso em:\n$dataHoraAtual';
         });
