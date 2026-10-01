@@ -8,10 +8,14 @@ O registro só é aceito quando o funcionário está a, no máximo, 100 metros d
 
 - Login com e-mail e senha usando Firebase Authentication.
 - Login biométrico usando a biometria disponível no aparelho.
+- Confirmação biométrica antes de cada registro de ponto.
 - Solicitação de permissão de localização durante o registro.
 - Cálculo da distância até o local de trabalho.
 - Bloqueio do registro para quem estiver fora do raio permitido.
-- Salvamento dos registros no Cloud Firestore.
+- Registro separado de entrada e saída.
+- Histórico dos registros atualizado em tempo real pelo Cloud Firestore.
+- Salvamento da distância e das coordenadas do registro.
+- Sessão persistente e logout.
 - Interface com Material 3 e identidade visual em tons roxos.
 
 ## Tecnologias utilizadas
@@ -63,11 +67,13 @@ Na raiz do projeto, execute:
 flutterfire configure
 ```
 
-Selecione o projeto Firebase e a plataforma Android. Esse comando deve gerar o arquivo `lib/firebase_options.dart`. O arquivo `google-services.json` também deve ficar em `android/app/`.
+Selecione o projeto Firebase e a plataforma Android. O arquivo `google-services.json` deve ficar em `android/app/`. O projeto Android já possui o plugin Google Services configurado e inicializa o Firebase usando esse arquivo.
+
+Para iOS, adicione o `GoogleService-Info.plist` gerado pelo Firebase ao projeto Xcode. As permissões de Face ID e localização já estão declaradas em `ios/Runner/Info.plist`.
 
 Se o comando não for encontrado, feche e abra o terminal depois de instalar o FlutterFire CLI. Se nenhum projeto aparecer, confirme que a conta usada no terminal tem acesso ao projeto Firebase.
 
-O aplicativo chama `Firebase.initializeApp()` antes de abrir a tela de login. Por isso, ele precisa estar configurado antes de ser executado em um aparelho.
+O aplicativo chama `Firebase.initializeApp()` antes de abrir a tela de login. Por isso, o `google-services.json` precisa estar configurado antes de executar no Android.
 
 ## Instalação e execução
 
@@ -111,7 +117,9 @@ As coordenadas acima são apenas um exemplo. Use a latitude e a longitude reais 
 4. Na tela inicial, toque em **Bater Ponto**.
 5. Permita o acesso à localização.
 6. Aguarde a validação da distância.
-7. Se estiver dentro do raio, o ponto será salvo no Firestore.
+7. Se estiver dentro do raio, confirme sua biometria.
+8. O ponto será salvo no Firestore.
+9. Consulte os registros em **Ver histórico**.
 
 Para usar a biometria, faça primeiro um login com e-mail e senha. Isso mantém uma sessão Firebase válida para associar o registro ao usuário correto.
 
@@ -127,9 +135,12 @@ lib/
 │   ├── firebase_service.dart          # Persistência no Firestore
 │   └── location_service.dart          # Permissões e cálculo de distância
 └── views/
-		├── home_view.dart                 # Registro do ponto
-		└── login_view.dart                # Login por senha ou biometria
+	├── home_view.dart                 # Registro do ponto
+	├── historico_view.dart             # Histórico em tempo real
+	└── login_view.dart                # Login por senha ou biometria
 ```
+
+Também fazem parte da entrega o [RELATORIO.md](RELATORIO.md), com as decisões técnicas da implementação, e o teste em `test/widget_test.dart`.
 
 ## Dados salvos
 
@@ -141,6 +152,8 @@ userId   identificador do usuário Firebase
 dataHora data e hora em formato ISO 8601
 latitude latitude obtida no momento do registro
 longitude longitude obtida no momento do registro
+tipo     `entrada` ou `saida`
+distanciaMetros distância até o local da empresa
 ```
 
 ## Permissões Android
@@ -169,7 +182,7 @@ Revise as regras com cuidado antes de usar o aplicativo em produção.
 - O login aceita e-mail. Para aceitar NIF, é necessário criar uma camada no backend que converta o NIF para o e-mail do usuário sem expor dados de outras pessoas.
 - As coordenadas da empresa ainda precisam ser configuradas para o endereço real.
 - Ainda não existe uma tela de criação de usuários; eles devem ser cadastrados pelo Firebase Console.
-- Não há testes automatizados no diretório `test/` atualmente.
+- O teste automatizado atual cobre a conversão do modelo para o formato salvo no Firestore.
 
 ## Solução de problemas
 
@@ -179,7 +192,7 @@ Verifique se o FlutterFire CLI está instalado, se o comando está no `PATH` e s
 
 ### O app fecha ao iniciar
 
-Confira se `lib/firebase_options.dart` foi gerado e se o `google-services.json` está em `android/app/`. Depois execute `flutter clean`, `flutter pub get` e `flutter run` novamente.
+Confira se o `google-services.json` está em `android/app/` e se o plugin Google Services está configurado nos arquivos Gradle. Depois execute `flutter clean`, `flutter pub get` e `flutter run` novamente.
 
 ### A localização é recusada
 

@@ -15,4 +15,18 @@ class FirebaseService {
       throw 'Erro ao salvar ponto no Firebase: $e';
     }
   }
+
+  Stream<List<PontoModel>> streamPontos(String userId) {
+    return _firestore
+        .collection('registros_ponto')
+        .where('userId', isEqualTo: userId)
+        .snapshots()
+        .map((snapshot) {
+          final pontos = snapshot.docs
+              .map((document) => PontoModel.fromMap(document.data()))
+              .toList();
+          pontos.sort((a, b) => b.dataHora.compareTo(a.dataHora));
+          return pontos;
+        });
+  }
 }

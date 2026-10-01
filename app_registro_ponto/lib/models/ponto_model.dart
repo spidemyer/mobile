@@ -4,6 +4,8 @@ class PontoModel {
   final String dataHora;
   final double latitude;
   final double longitude;
+  final String tipo;
+  final double distanciaMetros;
 
   PontoModel({
     required this.id,
@@ -11,6 +13,8 @@ class PontoModel {
     required this.dataHora,
     required this.latitude,
     required this.longitude,
+    required this.tipo,
+    required this.distanciaMetros,
   });
 
   // Converte o objeto para um Map para salvar no Firestore
@@ -22,6 +26,8 @@ class PontoModel {
       'dataHora': dataHora,
       'latitude': latitude,
       'longitude': longitude,
+      'tipo': tipo,
+      'distanciaMetros': distanciaMetros,
     };
   }
 
@@ -31,8 +37,10 @@ class PontoModel {
       id: map['id'] ?? '',
       userId: map['userId'] ?? '',
       dataHora: map['dataHora'] ?? '',
-      latitude: map['latitude'] ?? 0.0,
-      longitude: map['longitude'] ?? 0.0,
+      latitude: (map['latitude'] as num?)?.toDouble() ?? 0.0,
+      longitude: (map['longitude'] as num?)?.toDouble() ?? 0.0,
+      tipo: map['tipo']?.toString() ?? 'entrada',
+      distanciaMetros: (map['distanciaMetros'] as num?)?.toDouble() ?? 0.0,
     );
   }
 }

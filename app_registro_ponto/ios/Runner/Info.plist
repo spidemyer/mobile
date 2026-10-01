@@ -2,6 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+<key>NSFaceIDUsageDescription</key>
+<string>Usamos biometria para confirmar sua identidade ao registrar o ponto.</string>
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>Usamos sua localização para validar que você está no local de trabalho.</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>

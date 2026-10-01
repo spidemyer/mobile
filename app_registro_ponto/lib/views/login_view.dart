@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:local_auth/local_auth.dart';
 import '../services/auth_service.dart';
-import 'home_view.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -37,11 +36,6 @@ class _LoginViewState extends State<LoginView> {
     setState(() => _isLoading = true);
     try {
       await _authService.signInWithEmail(email, password);
-      if (!mounted) return;
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const HomeView()),
-      );
     } catch (e) {
       if (!mounted) return;
       _showMessage(e.toString().replaceFirst('Exception: ', ''));
@@ -57,12 +51,19 @@ class _LoginViewState extends State<LoginView> {
   }
 
   Future<void> _authenticateWithBiometrics() async {
+    if (_authService.currentUser == null) {
+      _showMessage(
+        'Entre com e-mail e senha uma vez antes de usar a biometria.',
+      );
+      return;
+    }
+
     try {
-      bool canCheckBiometrics = await _auth.canCheckBiometrics;
-      bool isSupported = await _auth.isDeviceSupported();
+      final canCheckBiometrics = await _auth.canCheckBiometrics;
+      final isSupported = await _auth.isDeviceSupported();
 
       if (canCheckBiometrics && isSupported) {
-        bool didAuthenticate = await _auth.authenticate(
+        final didAuthenticate = await _auth.authenticate(
           localizedReason: 'Por favor, autentique-se para registrar o ponto',
           options: const AuthenticationOptions(
             biometricOnly: true,
@@ -70,18 +71,11 @@ class _LoginViewState extends State<LoginView> {
           ),
         );
 
-        if (didAuthenticate && mounted) {
-          if (_authService.currentUser == null) {
-            _showMessage(
-              'Entre com e-mail e senha uma vez antes de usar a biometria.',
-            );
-            return;
-          }
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const HomeView()),
-          );
+        if (!didAuthenticate && mounted) {
+          _showMessage('Biometria não confirmada.');
         }
+      } else if (mounted) {
+        _showMessage('Este aparelho não possui biometria disponível.');
       }
     } catch (e) {
       if (!mounted) return;
