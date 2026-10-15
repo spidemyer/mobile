@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "148536871926",
+    "project_id": "tarefas-list-emily",
+    "storage_bucket": "tarefas-list-emily.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:148536871926:android:e3d9164ea9f89e7b4255d7",
+        "android_client_info": {
+          "package_name": "com.example.tarefas_list_firebase"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "148536871926-bej8flpm1g1plbr2hpv1ts0et61846pt.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCizerBLZevf1pgBxR_Jfau7wr3dweVfB8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "148536871926-bej8flpm1g1plbr2hpv1ts0et61846pt.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
