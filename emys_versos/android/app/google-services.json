@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1092090168899",
+    "project_id": "emys-versos",
+    "storage_bucket": "emys-versos.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1092090168899:android:de7f77ccdfc17ec14236f6",
+        "android_client_info": {
+          "package_name": "com.example.emys_versos"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1092090168899-32d2ln4vqt6pf28gjs46ekql6c1391rv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDFqvUwh19JOlGAIkqgW-A_dYmlnXkz6rw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1092090168899-32d2ln4vqt6pf28gjs46ekql6c1391rv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
