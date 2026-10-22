@@ -1,163 +1,145 @@
-# Emy's Versos — Book Nook
+```markdown
+# 📚 Emy's Versos - Estante de Livros Digital
 
-Aplicativo móvel de estante digital desenvolvido em Flutter e Firebase. O
-projeto permite pesquisar livros, organizar leituras em estantes pessoais,
-acompanhar páginas lidas e consultar estatísticas atualizadas no Firestore por
-Cloud Functions.
+**Emy's Versos** é um aplicativo móvel Android desenvolvido em Flutter para gestão e acompanhamento de leituras pessoais. O aplicativo permite buscar livros em APIs públicas, cadastrar novos livros manualmente, organizá-los em estantes virtuais (*Quero Ler*, *Lendo*, *Lidos*), acompanhar o progresso de leitura em tempo real e visualizar estatísticas gerais.
 
-## Funcionalidades
+---
 
-- Cadastro e login com e-mail e senha.
-- Login com conta Google.
-- Pesquisa de livros por título ou autor usando Google Books e Open Library.
-- Inclusão de livros encontrados na estante ou cadastro manual.
-- Organização dos livros nas categorias **Quero Ler**, **Lendo** e **Lidos**.
-- Atualização do total de páginas e do progresso de leitura.
-- Remoção de livros.
-- Abertura de links de prévia/leitura quando disponibilizados pelas fontes.
-- Estatísticas de livros concluídos e páginas lidas, recalculadas no backend
-  quando um livro é criado, alterado ou removido.
-- Dados individuais protegidos por regras do Cloud Firestore.
+## 🎨 Tema e Identidade Visual
 
-## Tecnologias
+O aplicativo utiliza uma paleta elegante em tons de **Roxo e Lilás** (`#6A1B9A`, `#8E24AA`, `#E1BEE7`), garantindo uma interface moderna, acolhedora e agradável para os leitores.
 
-- Flutter e Dart
-- Provider para gerenciamento de estado
-- Firebase Authentication
-- Cloud Firestore
-- Cloud Functions for Firebase (Node.js 22)
-- Google Books API e Open Library API
+---
 
-## Organização do projeto
+## 🛠️ Tecnologias e Dependências
+
+- **Linguagem / Framework:** Dart e [Flutter](https://flutter.dev)
+- **Gerenciamento de Estado:** [Provider](https://pub.dev/packages/provider)
+- **Autenticação & Backend:** 
+  - [Firebase Auth](https://firebase.google.com/docs/auth) (E-mail/Senha e Google Sign-In)
+  - [Cloud Firestore](https://firebase.google.com/docs/firestore) (Persistência de dados em tempo real)
+- **APIs de Livros:**
+  - [Google Books API](https://developers.google.com/books)
+  - [Open Library API](https://openlibrary.org/developers/api)
+- **Outros Pacientes:** `http`, `google_fonts`, `google_sign_in`, `url_launcher`
+
+---
+
+## 🏗️ Arquitetura do Projeto
+
+O projeto segue o padrão **MVVM (Model-View-ViewModel)** com separação bem definida de responsabilidades:
+
+```mermaid
+graph TD
+    A[Views / Interface] -->|Consome dados| B[ViewModels / Provider]
+    B -->|Solicita dados| C[Services]
+    C -->|Requisição HTTP| D[Google Books & Open Library APIs]
+    C -->|Leitura e Escrita| E[Cloud Firestore]
+    A -->|Ações do Usuário| B
+    E -->|Stream de Dados| A
+
+```
+
+### 📁 Estrutura de Pastas
 
 ```text
 lib/
-  models/       Modelo e conversão dos dados de livros
-  services/     Integrações com Firebase e APIs de livros
-  viewmodels/   Estado e ações da aplicação
-  views/        Telas de login, busca, estantes e estatísticas
-functions/
-  index.js      Atualização das estatísticas no backend
-firestore.rules Regras de acesso ao Firestore
+├── models/
+│   └── book_model.dart          # Modelo de dados do livro
+├── services/
+│   ├── auth_service.dart        # Gerenciamento de Autenticação (Firebase e Google)
+│   ├── database_service.dart    # Operações de leitura/escrita no Firestore
+│   └── google_books_service.dart# Integração com APIs externas
+├── viewmodels/
+│   └── book_provider.dart       # Estado global e regras de negócio dos livros
+└── views/
+    ├── login_view.dart          # Tela de Login e Registro
+    ├── main_navigation_view.dart# Navegação por abas (BottomNavigationBar)
+    ├── search_books_view.dart   # Tela de busca de livros
+    ├── shelves_view.dart        # Tela de estantes com abas (Quero Ler, Lendo, Lidos)
+    └── stats_view.dart          # Painel estatístico em tempo real
+
 ```
 
-## Requisitos
+---
 
-- Flutter instalado e configurado para desenvolvimento Android.
-- Node.js 22 e npm para instalar e implantar as Cloud Functions.
-- Firebase CLI instalado e autenticado.
-- Um projeto Firebase com Cloud Firestore e Firebase Authentication.
-- Plano Firebase Blaze para implantar Cloud Functions. O uso de serviços
-  Firebase pode gerar custos; consulte os limites e preços do seu projeto.
+## 🌟 Funcionalidades
 
-## Configuração do Firebase
+* **🔒 Autenticação Flexível:** Registro e login via E-mail/Senha ou Google Sign-In.
+* **🔍 Busca Integrada:** Consulta simultânea à Google Books API e Open Library API.
+* **➕ Cadastro Manual:** Formulário para adicionar livros personalizados informando Título, Autor, Páginas, Descrição e URL da Capa.
+* **📚 Estantes Virtuais:**
+* **Quero Ler:** Lista de desejos de leitura.
+* **Lendo:** Livros em andamento com barra de progresso visual.
+* **Lidos:** Histórico de livros concluídos.
 
-1. Crie ou selecione um projeto no [console do Firebase](https://console.firebase.google.com/).
-2. Ative **Authentication** e habilite os provedores **E-mail/senha** e
-   **Google**.
-3. Crie o banco **Cloud Firestore** em modo nativo.
-4. Configure o app Android no projeto Firebase com o mesmo application ID do
-   projeto Flutter.
-5. Gere/atualize os arquivos de configuração com FlutterFire:
 
-   ```bash
-   dart pub global activate flutterfire_cli
-   flutterfire configure --project SEU_PROJECT_ID --platforms android
-   ```
+* **✏️ Gestão e Progresso:**
+* Atualização diária das páginas lidas.
+* Edição do número total de páginas do livro.
+* Movimentação fácil de livros entre as estantes.
+* Remoção de livros com confirmação de segurança.
 
-   O comando gera `lib/firebase_options.dart` e atualiza a configuração Android.
-   Não substitua esses arquivos pelos de outro projeto sem conferir o
-   application ID.
-6. Para login Google no Android, registre as chaves SHA-1 e SHA-256 do
-   certificado de desenvolvimento no Firebase. Atualize a configuração Android
-   depois de registrar as chaves.
-7. Faça login no Firebase CLI e associe o diretório ao projeto:
 
-   ```bash
-   firebase login
-   firebase use --add
-   ```
+* **📊 Estatísticas em Tempo Real:** Cálculo automático do total de livros lidos e páginas lidas gravado e atualizado no Firestore.
+* **📖 Leitor de Prévia:** Botão **"LER"** para redirecionar o usuário diretamente para a prévia externa do livro.
 
-   Se preferir, passe o ID explicitamente em cada comando:
-   `firebase deploy --project SEU_PROJECT_ID ...`.
+---
 
-> `firebase_options.dart` e `google-services.json` contêm identificadores de
-> configuração do aplicativo, não substituem regras de segurança. Não inclua
-> chaves privadas, senhas ou credenciais de serviço no repositório.
+## 🗄️ Estrutura do Banco de Dados (Cloud Firestore)
 
-## Instalação e execução
-
-Na raiz do projeto:
-
-```bash
-flutter pub get
-flutter run
-```
-
-Para validar o código Flutter:
-
-```bash
-flutter analyze
-```
-
-O repositório ainda não contém testes automatizados; adicione testes em
-`test/` para validar novas funcionalidades com `flutter test`.
-
-## Implantação do backend
-
-As estatísticas são calculadas por uma função acionada por alterações em
-`users/{userId}/books/{bookId}`. A função atualiza
-`users/{userId}/stats/general`; o aplicativo lê esse documento em tempo real e
-não grava estatísticas diretamente.
-
-Instale as dependências das funções e implante as regras e funções:
-
-```bash
-npm --prefix functions install
-firebase deploy --only firestore:rules,functions
-```
-
-Use o mesmo projeto Firebase configurado para o aplicativo. A atualização das
-estatísticas é assíncrona: após uma alteração na estante, pode haver um breve
-intervalo até a função concluir e os novos totais aparecerem.
-
-## Modelo de dados no Firestore
-
-Cada conta possui uma coleção própria de livros:
+Os dados são mantidos estruturados e isolados por usuário:
 
 ```text
-users/{uid}/books/{bookId}
-  title: string
-  authors: array<string>
-  description: string | null
-  pageCount: number
-  pagesRead: number
-  thumbnailUrl: string | null
-  status: "Quero Ler" | "Lendo" | "Lidos"
-  previewLink: string | null
-  updatedAt: string
+/users/{userId}
+  ├── /books/{bookId}
+  │     ├── id: String
+  │     ├── title: String
+  │     ├── authors: Array<String>
+  │     ├── description: String
+  │     ├── pageCount: Number
+  │     ├── pagesRead: Number
+  │     ├── status: String ("Quero Ler" | "Lendo" | "Lidos")
+  │     ├── thumbnailUrl: String?
+  │     └── previewLink: String?
+  │
+  └── /stats/general
+        ├── livrosLidos: Number
+        └── paginasLidas: Number
 
-users/{uid}/stats/general
-  livrosLidos: number
-  paginasLidas: number
-  updatedAt: timestamp
 ```
 
-As regras em `firestore.rules` permitem que cada pessoa leia e altere apenas os
-próprios livros. As estatísticas podem ser lidas pelo titular, mas somente o
-backend (que usa o Admin SDK) pode gravá-las.
+---
 
-## Fontes de livros
+## 🚀 Como Executar o Projeto
 
-As pesquisas são feitas em paralelo na Google Books API e na Open Library. As
-APIs públicas podem impor limites, ficar indisponíveis ou retornar informações
-incompletas; por isso, alguns livros podem não ter capa, número de páginas ou
-link de prévia.
+### Pré-requisitos
 
-## Escopo e evolução
+* [Flutter SDK](https://docs.flutter.dev/get-started/install) instalado.
+* Android Studio / VS Code configurados.
+* Projeto configurado no [Firebase Console](https://console.firebase.google.com/).
 
-Este repositório corresponde ao cenário **A Estante de Livros Digital
-("Book Nook")**: gerenciamento de estado no Flutter e lógica de backend com
-Cloud Functions. A integração de Firebase Storage, geolocalização,
-relacionamentos musicais e receitas pertence a outros cenários da atividade e
-não faz parte deste aplicativo.
+### Passo a passo
+
+1. **Clonar o repositório:**
+```bash
+git clone [https://github.com/seu-usuario/emys_versos.git](https://github.com/seu-usuario/emys_versos.git)
+cd emys_versos
+
+```
+
+
+2. **Instalar as dependências:**
+```bash
+flutter pub get
+
+```
+
+
+3. **Configurar o Firebase:**
+Certifique-se de que o arquivo `google-services.json` está dentro da pasta `android/app/` e que a chave **SHA-1** do seu ambiente local está registrada no Console do Firebase para o Google Sign-In funcionar.
+4. **Executar a aplicação:**
+```bash
+flutter run
+
+```
