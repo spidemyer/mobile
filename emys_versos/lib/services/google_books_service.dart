@@ -1,95 +1,120 @@
 import 'dart:convert';
+import 'dart:developer' as developer;
+
 import 'package:http/http.dart' as http;
+
 import '../models/book_model.dart';
-
+// Serviço para buscar livros usando Google Books API e Open Library API
 class GoogleBooksService {
-  static const String _googleBaseUrl = 'https://www.googleapis.com/books/v1/volumes';
-  static const String _openLibraryBaseUrl = 'https://openlibrary.org/search.json';
-  
-  // Insira sua chave da Google Books se tiver (opcional)
-  static const String _apiKey = 'AIzaSyAjnCPCKHwILctV0V3-9M6d7E2jycYD5yc'; 
-
+  static const String _googleBaseUrl =
+      'https://www.googleapis.com/books/v1/volumes';
+  static const String _openLibraryBaseUrl =
+      'https://openlibrary.org/search.json';
+  // Busca livros por título, autor ou ISBN
   Future<List<BookModel>> searchBooks(String query) async {
     if (query.trim().isEmpty) return [];
 
-    // Executa as duas buscas em paralelo para alta performance
     final results = await Future.wait([
       _searchGoogleBooks(query),
       _searchOpenLibrary(query),
     ]);
 
-    final List<BookModel> combined = [];
-    combined.addAll(results[0]);
-    combined.addAll(results[1]);
-
-    return combined;
+    return [...results[0], ...results[1]];
   }
-
-  // Busca na Google Books API
+  // Busca livros na Google Books API
   Future<List<BookModel>> _searchGoogleBooks(String query) async {
-    String urlString = '$_googleBaseUrl?q=${Uri.encodeComponent(query)}&maxResults=10';
-    if (_apiKey.isNotEmpty) {
-      urlString += '&key=$_apiKey';
-    }
+    final uri = Uri.parse(_googleBaseUrl).replace(queryParameters: {
+      'q': query,
+      'maxResults': '10',
+    });
 
     try {
-      final response = await http.get(Uri.parse(urlString));
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> data = json.decode(response.body);
-        final List<dynamic>? items = data['items'];
-        if (items == null) return [];
-
-        return items.map((json) => BookModel.fromApiJson(json)).toList();
+      final response = await http.get(uri);
+      if (response.statusCode != 200) {
+        developer.log(
+          'Google Books retornou status ${response.statusCode}.',
+        );
+        return [];
       }
-    } catch (e) {
-      print('Erro ao buscar no Google Books: $e');
+
+      final data = json.decode(response.body) as Map<String, dynamic>;
+      final items = data['items'] as List<dynamic>?;
+      return items
+              ?.map((item) => BookModel.fromApiJson(
+                  item as Map<String, dynamic>))
+              .toList() ??
+          [];
+    } on FormatException catch (error, stackTrace) {
+      developer.log(
+        'Resposta inválida do Google Books.',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      return [];
+    } on http.ClientException catch (error, stackTrace) {
+      developer.log(
+        'Falha ao consultar Google Books.',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      return [];
     }
-    return [];
   }
-
-  // Busca na Open Library API (Internet Archive)
+  // Busca livros na Open Library API
   Future<List<BookModel>> _searchOpenLibrary(String query) async {
-    final urlString = '$_openLibraryBaseUrl?q=${Uri.encodeComponent(query)}&limit=10';
+    final uri = Uri.parse(_openLibraryBaseUrl).replace(queryParameters: {
+      'q': query,
+      'limit': '10',
+    });
 
     try {
-      final response = await http.get(Uri.parse(urlString));
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> data = json.decode(response.body);
-        final List<dynamic>? docs = data['docs'];
-        if (docs == null) return [];
-
-        return docs.map((doc) {
-          final String title = doc['title'] ?? 'Título desconhecido';
-          final List<dynamic>? authorsList = doc['author_name'];
-          final List<String> authors = authorsList != null
-              ? authorsList.map((e) => e.toString()).toList()
-              : ['Autor desconhecido'];
-          final int pageCount = doc['number_of_pages_median'] ?? 0;
-          final int? coverId = doc['cover_i'];
-
-          String? thumbnailUrl;
-          if (coverId != null) {
-            thumbnailUrl = 'https://covers.openlibrary.org/b/id/$coverId-M.jpg';
-          }
-
-          // Cria o link de leitura do Open Library
-          final String key = doc['key'] ?? '';
-          final String? previewLink = key.isNotEmpty ? 'https://openlibrary.org$key' : null;
-
-          return BookModel(
-            id: 'ol_${doc['key'] ?? title.hashCode}',
-            title: title,
-            authors: authors,
-            description: 'Livro disponibilizado via Open Library.',
-            pageCount: pageCount,
-            thumbnailUrl: thumbnailUrl,
-            previewLink: previewLink,
-          );
-        }).toList();
+      final response = await http.get(uri);
+      if (response.statusCode != 200) {
+        developer.log(
+          'Open Library retornou status ${response.statusCode}.',
+        );
+        return [];
       }
-    } catch (e) {
-      print('Erro ao buscar na Open Library: $e');
+  
+      final data = json.decode(response.body) as Map<String, dynamic>;
+      final docs = data['docs'] as List<dynamic>?;
+      if (docs == null) return [];
+
+      return docs.map((doc) {
+        final book = doc as Map<String, dynamic>;
+        final title = book['title'] as String? ?? 'Título desconhecido';
+        final rawAuthors = book['author_name'] as List<dynamic>?;
+        final authors = rawAuthors?.map((author) => author.toString()).toList() ??
+            ['Autor desconhecido'];
+        final coverId = book['cover_i'] as int?;
+        final key = book['key'] as String? ?? '';
+
+        return BookModel(
+          id: 'ol_${key.isNotEmpty ? key : title.hashCode}',
+          title: title,
+          authors: authors,
+          description: 'Livro disponibilizado via Open Library.',
+          pageCount: (book['number_of_pages_median'] as num?)?.toInt() ?? 0,
+          thumbnailUrl: coverId == null
+              ? null
+              : 'https://covers.openlibrary.org/b/id/$coverId-M.jpg',
+          previewLink: key.isEmpty ? null : 'https://openlibrary.org$key',
+        );
+      }).toList();
+    } on FormatException catch (error, stackTrace) {
+      developer.log(
+        'Resposta inválida da Open Library.',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      return [];
+    } on http.ClientException catch (error, stackTrace) {
+      developer.log(
+        'Falha ao consultar Open Library.',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      return [];
     }
-    return [];
   }
 }

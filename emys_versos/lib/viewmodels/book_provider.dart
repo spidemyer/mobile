@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import '../models/book_model.dart';
 import '../services/google_books_service.dart';
 import '../services/database_service.dart';
-
+// ViewModel para gerenciar a lógica de busca e manipulação de livros
 class BookProvider extends ChangeNotifier {
   final GoogleBooksService _apiService = GoogleBooksService();
   final DatabaseService _dbService = DatabaseService();
-
+  // Lista de livros resultantes da busca
   List<BookModel> _searchResults = [];
   bool _isLoading = false;
 
@@ -14,10 +14,9 @@ class BookProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
 
   BookProvider() {
-    // Carrega sugestões de best-sellers ao abrir a tela de busca
     loadFeaturedBooks();
   }
-
+  // Carrega livros em destaque (bestsellers) ao iniciar
   Future<void> loadFeaturedBooks() async {
     _isLoading = true;
     notifyListeners();
@@ -39,11 +38,13 @@ class BookProvider extends ChangeNotifier {
     _isLoading = false;
     notifyListeners();
   }
+  // Adiciona um livro à estante do usuário
+  Future<void> addBookToShelf(String userId, BookModel book, String status) async {
+    // IMPORTANTE: Limpa o ID para remover caracteres inválidos do Firestore (como '/')
+    final cleanId = book.id.replaceAll('/', '_').replaceAll(' ', '_');
 
-  Future<void> addBookToShelf(
-      String userId, BookModel book, String status) async {
     final updatedBook = BookModel(
-      id: book.id,
+      id: cleanId,
       title: book.title,
       authors: book.authors,
       description: book.description,
@@ -55,16 +56,21 @@ class BookProvider extends ChangeNotifier {
     );
 
     await _dbService.saveBook(userId, updatedBook);
+    notifyListeners();
   }
-
-  Future<void> changeBookStatus(
-      String userId, String bookId, String newStatus) async {
+  // Atualiza o status de um livro na estante do usuário
+  Future<void> changeBookStatus(String userId, String bookId, String newStatus) async {
     await _dbService.updateBookStatus(userId, bookId, newStatus);
+    notifyListeners();
   }
-
-  // Atualiza o progresso de leitura
-  Future<void> updatePagesRead(
-      String userId, String bookId, int pagesRead, int totalPages) async {
+  // Atualiza o número de páginas lidas de um livro na estante do usuário
+  Future<void> updatePagesRead(String userId, String bookId, int pagesRead, int totalPages) async {
     await _dbService.updatePagesRead(userId, bookId, pagesRead, totalPages);
+    notifyListeners();
+  }
+  // Atualiza o total de páginas de um livro na estante do usuário
+  Future<void> removeBookFromShelf(String userId, String bookId) async {
+    await _dbService.deleteBook(userId, bookId);
+    notifyListeners();
   }
 }

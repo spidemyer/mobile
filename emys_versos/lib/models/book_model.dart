@@ -9,6 +9,7 @@ class BookModel {
   final String status; // 'Quero Ler', 'Lendo', 'Lidos'
   final String? previewLink; // Link para leitura/prévia
 
+// Construtor
   BookModel({
     required this.id,
     required this.title,

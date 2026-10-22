@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
 import '../services/database_service.dart';
 
+// View para exibir as estatísticas do usuário, como livros lidos e páginas lidas
 class StatsView extends StatelessWidget {
   const StatsView({super.key});
 
@@ -11,18 +12,28 @@ class StatsView extends StatelessWidget {
     final userId = Provider.of<AuthService>(context).currentUser?.uid;
     final dbService = DatabaseService();
 
-    if (userId == null) return const Center(child: Text("Usuário não autenticado"));
+    if (userId == null) {
+      return const Center(child: Text("Usuário não autenticado"));
+    }
 
     return StreamBuilder<Map<String, dynamic>>(
       stream: dbService.getUserStats(userId),
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator(color: Color(0xFF6A1B9A)));
+        if (snapshot.hasError) {
+          return const Center(
+            child: Text('Não foi possível carregar as estatísticas.'),
+          );
         }
 
-        final stats = snapshot.data ?? {'livrosLidos': 0, 'paginasLidas': 0};
-        final livrosLidos = stats['livrosLidos'] ?? 0;
-        final paginasLidas = stats['paginasLidas'] ?? 0;
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: CircularProgressIndicator(color: Color(0xFF6A1B9A)),
+          );
+        }
+
+        final stats = snapshot.data;
+        final livrosLidos = (stats?['livrosLidos'] as num?)?.toInt() ?? 0;
+        final paginasLidas = (stats?['paginasLidas'] as num?)?.toInt() ?? 0;
 
         return Padding(
           padding: const EdgeInsets.all(24.0),
@@ -31,7 +42,11 @@ class StatsView extends StatelessWidget {
             children: [
               const Text(
                 'Minhas Estatísticas',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF4A148C)),
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF4A148C),
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
@@ -71,20 +86,27 @@ class StatsView extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 30,
-              backgroundColor: color.withOpacity(0.15),
+              backgroundColor: color.withValues(alpha: 0.15),
               child: Icon(icon, color: color, size: 32),
             ),
             const SizedBox(width: 20),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(fontSize: 16, color: Colors.grey)),
+                Text(
+                  title,
+                  style: const TextStyle(fontSize: 16, color: Colors.grey),
+                ),
                 Text(
                   value,
-                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: color),
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: color,
+                  ),
                 ),
               ],
-            )
+            ),
           ],
         ),
       ),

@@ -8,17 +8,17 @@ class LoginView extends StatefulWidget {
   @override
   State<LoginView> createState() => _LoginViewState();
 }
-
+// View para gerenciar o login e cadastro de usuários
 class _LoginViewState extends State<LoginView> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-
+  // Variáveis de estado para controlar o modo de login/cadastro, carregamento e visibilidade da senha
   bool _isLogin = true;
   bool _isLoading = false;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
-
+  // Função para lidar com o envio do formulário de login/cadastro
   Future<void> _submit() async {
     final authService = Provider.of<AuthService>(context, listen: false);
     final email = _emailController.text.trim();
@@ -89,7 +89,7 @@ class _LoginViewState extends State<LoginView> {
                 ),
               ),
               const Text(
-                "Sua Estante Digital do Clube Leitores & Cia.",
+                "Sua Estante Digital.",
                 style: TextStyle(color: Colors.grey),
               ),
               const SizedBox(height: 32),

@@ -30,7 +30,7 @@ class SearchBooksView extends StatelessWidget {
       }
     }
   }
-
+  // Função para mostrar o diálogo de adicionar livro à estante
   void _showAddToShelfDialog(BuildContext context, BookModel book) {
     final userId = Provider.of<AuthService>(context, listen: false).currentUser?.uid;
     final bookProvider = Provider.of<BookProvider>(context, listen: false);
