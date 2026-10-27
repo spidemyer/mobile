@@ -5,158 +5,9 @@ import '../services/auth_service.dart';
 import '../services/database_service.dart';
 import '../models/book_model.dart';
 import '../viewmodels/book_provider.dart';
-// View para gerenciar as estantes do usuário (Quero Ler, Lendo, Lidos)
+
 class ShelvesView extends StatelessWidget {
   const ShelvesView({super.key});
-  // Função para abrir o leitor/link do livro
-  void _showAddCustomBookModal(BuildContext context) {
-    final userId = Provider.of<AuthService>(context, listen: false).currentUser?.uid;
-    final bookProvider = Provider.of<BookProvider>(context, listen: false);
-
-    if (userId == null) return;
-  // Controladores de texto para os campos do formulário
-    final titleController = TextEditingController();
-    final authorController = TextEditingController();
-    final pagesController = TextEditingController();
-    final descController = TextEditingController();
-    final imageController = TextEditingController();
-    String selectedShelf = 'Quero Ler';
-    // Função para mostrar o modal de adicionar livro manualmente
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (ctx) {
-        return Padding(
-          padding: EdgeInsets.only(
-            left: 20,
-            right: 20,
-            top: 20,
-            bottom: MediaQuery.of(ctx).viewInsets.bottom + 20,
-          ),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const Text(
-                  'Adicionar Livro Manualmente',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF4A148C),
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: titleController,
-                  decoration: InputDecoration(
-                    labelText: 'Título do Livro *',
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: authorController,
-                  decoration: InputDecoration(
-                    labelText: 'Nome do Autor *',
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: pagesController,
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    labelText: 'Número Total de Páginas *',
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: descController,
-                  maxLines: 2,
-                  decoration: InputDecoration(
-                    labelText: 'Descrição (Opcional)',
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: imageController,
-                  decoration: InputDecoration(
-                    labelText: 'URL da Imagem da Capa (Opcional)',
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                DropdownButtonFormField<String>(
-                  initialValue: selectedShelf, // Corrigido para 'value'
-                  decoration: InputDecoration(
-                    labelText: 'Estante Destino',
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                  items: const [
-                    DropdownMenuItem(value: 'Quero Ler', child: Text('Quero Ler')),
-                    DropdownMenuItem(value: 'Lendo', child: Text('Lendo')),
-                    DropdownMenuItem(value: 'Lidos', child: Text('Lidos')),
-                  ],
-                  onChanged: (val) {
-                    if (val != null) selectedShelf = val;
-                  },
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF6A1B9A),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                  onPressed: () {
-                    final title = titleController.text.trim();
-                    final author = authorController.text.trim();
-                    final pages = int.tryParse(pagesController.text) ?? 200;
-
-                    if (title.isEmpty || author.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Preencha pelo menos o Título e o Autor!')),
-                      );
-                      return;
-                    }
-
-                    final customBook = BookModel(
-                      id: 'custom_${DateTime.now().millisecondsSinceEpoch}',
-                      title: title,
-                      authors: [author],
-                      description: descController.text.trim().isEmpty
-                          ? 'Livro cadastrado manualmente.'
-                          : descController.text.trim(),
-                      pageCount: pages,
-                      thumbnailUrl: imageController.text.trim().isEmpty
-                          ? null
-                          : imageController.text.trim(),
-                      status: selectedShelf,
-                    );
-
-                    bookProvider.addBookToShelf(userId, customBook, selectedShelf);
-                    Navigator.pop(ctx);
-
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Livro adicionado com sucesso!')),
-                    );
-                  },
-                  child: const Text('Salvar Livro', style: TextStyle(fontSize: 16, color: Colors.white)),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -168,11 +19,6 @@ class ShelvesView extends StatelessWidget {
           title: const Text("Emy's Versos", style: TextStyle(fontWeight: FontWeight.bold)),
           centerTitle: false,
           actions: [
-            IconButton(
-              icon: const Icon(Icons.add_circle, size: 30, color: Colors.white),
-              tooltip: 'Adicionar Livro Manualmente',
-              onPressed: () => _showAddCustomBookModal(context),
-            ),
             IconButton(
               icon: const Icon(Icons.logout),
               onPressed: () => Provider.of<AuthService>(context, listen: false).signOut(),
@@ -200,7 +46,7 @@ class ShelvesView extends StatelessWidget {
     );
   }
 }
-// Widget que representa a lista de livros em uma estante específica
+
 class ShelfList extends StatelessWidget {
   final String status;
   const ShelfList({super.key, required this.status});
@@ -226,9 +72,9 @@ class ShelfList extends StatelessWidget {
       }
     }
   }
-  // Função para mostrar o diálogo de atualizar páginas lidas e total de páginas
-  void _showUpdatePagesDialog(
-      BuildContext context, String userId, BookModel book) {
+
+  // DIÁLOGO PARA EDITAR TOTAL DE PÁGINAS E PÁGINAS LIDAS
+  void _showUpdatePagesDialog(BuildContext context, String userId, BookModel book) {
     final totalPagesController = TextEditingController(text: book.pageCount.toString());
     final readPagesController = TextEditingController(text: book.pagesRead.toString());
     final bookProvider = Provider.of<BookProvider>(context, listen: false);
@@ -262,10 +108,7 @@ class ShelfList extends StatelessWidget {
           ],
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancelar'),
-          ),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar')),
           ElevatedButton(
             onPressed: () async {
               final newTotal = int.tryParse(totalPagesController.text) ?? book.pageCount;
@@ -286,39 +129,68 @@ class ShelfList extends StatelessWidget {
     );
   }
 
-  void _confirmDelete(BuildContext context, String userId, BookModel book) {
-    final bookProvider = Provider.of<BookProvider>(context, listen: false);
+  // DIÁLOGO PARA DEFINIR DATA DE TÉRMINO (Aparece nos Lidos)
+  void _showFinishedDateDialog(BuildContext context, String userId, BookModel book) {
+    final dbService = DatabaseService();
+    String selectedYear = book.finishedDate?.split('-')[0] ?? DateTime.now().year.toString();
+    String selectedMonth = book.finishedDate?.split('-')[1] ?? DateTime.now().month.toString().padLeft(2, '0');
 
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Remover Livro', style: TextStyle(color: Color(0xFF4A148C))),
-        content: Text('Tem certeza que deseja remover "${book.title}" da sua estante?'),
+        title: Text('Data de Término\n"${book.title}"',
+            style: const TextStyle(fontSize: 16, color: Color(0xFF4A148C))),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Selecione o mês e ano em que terminou de ler:',
+                style: TextStyle(fontSize: 13, color: Colors.grey)),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: DropdownButtonFormField<String>(
+                    value: selectedYear,
+                    decoration: const InputDecoration(labelText: 'Ano'),
+                    items: ['2026', '2025', '2024', '2023']
+                        .map((y) => DropdownMenuItem(value: y, child: Text(y)))
+                        .toList(),
+                    onChanged: (val) {
+                      if (val != null) selectedYear = val;
+                    },
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: DropdownButtonFormField<String>(
+                    value: selectedMonth,
+                    decoration: const InputDecoration(labelText: 'Mês'),
+                    items: {
+                      '01': 'Janeiro', '02': 'Fevereiro', '03': 'Março', '04': 'Abril',
+                      '05': 'Maio', '06': 'Junho', '07': 'Julho', '08': 'Agosto',
+                      '09': 'Setembro', '10': 'Outubro', '11': 'Novembro', '12': 'Dezembro'
+                    }.entries.map((e) => DropdownMenuItem(value: e.key, child: Text(e.value))).toList(),
+                    onChanged: (val) {
+                      if (val != null) selectedMonth = val;
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancelar'),
-          ),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar')),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
             onPressed: () async {
-              try {
-                await bookProvider.removeBookFromShelf(userId, book.id);
-              } catch (error) {
-                if (ctx.mounted) {
-                  ScaffoldMessenger.of(ctx).showSnackBar(
-                    SnackBar(content: Text('Erro ao remover livro: $error')),
-                  );
-                }
-                return;
-              }
-              if (!ctx.mounted) return;
-              Navigator.pop(ctx);
+              final dateStr = '$selectedYear-$selectedMonth-01';
+              await dbService.updateBookFinishedDate(userId, book.id, dateStr);
+              if (ctx.mounted) Navigator.pop(ctx);
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('"${book.title}" foi removido.')),
+                const SnackBar(content: Text('Data de leitura salva com sucesso!')),
               );
             },
-            child: const Text('Remover', style: TextStyle(color: Colors.white)),
+            child: const Text('Salvar'),
           ),
         ],
       ),
@@ -331,16 +203,13 @@ class ShelfList extends StatelessWidget {
     final dbService = DatabaseService();
     final bookProvider = Provider.of<BookProvider>(context, listen: false);
 
-    if (userId == null) {
-      return const Center(child: Text("Usuário não autenticado"));
-    }
+    if (userId == null) return const Center(child: Text("Usuário não autenticado"));
 
     return StreamBuilder<List<BookModel>>(
       stream: dbService.getUserBooksByStatus(userId, status),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(
-              child: CircularProgressIndicator(color: Color(0xFF6A1B9A)));
+          return const Center(child: CircularProgressIndicator(color: Color(0xFF6A1B9A)));
         }
         final books = snapshot.data ?? [];
         if (books.isEmpty) {
@@ -359,56 +228,35 @@ class ShelfList extends StatelessWidget {
             return Card(
               color: Colors.white,
               margin: const EdgeInsets.only(bottom: 12),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Column(
                   children: [
                     ListTile(
                       leading: book.thumbnailUrl != null
-                          ? Image.network(book.thumbnailUrl!,
-                              width: 45, fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) =>
-                                  const Icon(Icons.book, size: 40, color: Color(0xFF8E24AA)))
-                          : const Icon(Icons.book,
-                              size: 40, color: Color(0xFF8E24AA)),
-                      title: Text(book.title,
-                          style: const TextStyle(fontWeight: FontWeight.bold)),
+                          ? Image.network(book.thumbnailUrl!, width: 45, fit: BoxFit.cover,
+                              errorBuilder: (c, e, s) => const Icon(Icons.book, color: Color(0xFF8E24AA)))
+                          : const Icon(Icons.book, size: 40, color: Color(0xFF8E24AA)),
+                      title: Text(book.title, style: const TextStyle(fontWeight: FontWeight.bold)),
                       subtitle: Text(
-                        // CORRIGIDO AQUI: Adicionado o asterisco (*) que faltava na multiplicação
-                        '${book.authors.join(", ")}\nProgresso: ${book.pagesRead} de ${book.pageCount} págs. (${(progress * 100).toStringAsFixed(0)}%)',
+                        '${book.authors.join(", ")}\nProgresso: ${book.pagesRead} de ${book.pageCount} págs. (${(progress * 100).toStringAsFixed(0)}%)'
+                        '${book.finishedDate != null ? "\nConcluído em: ${book.finishedDate}" : ""}',
                       ),
                       trailing: PopupMenuButton<String>(
-                        onSelected: (value) {
-                          if (value == 'REMOVER') {
-                            _confirmDelete(context, userId, book);
+                        onSelected: (val) {
+                          if (val == 'REMOVER') {
+                            bookProvider.removeBookFromShelf(userId, book.id);
                           } else {
-                            bookProvider.changeBookStatus(userId, book.id, value);
+                            bookProvider.changeBookStatus(userId, book.id, val);
                           }
                         },
                         itemBuilder: (context) => [
-                          if (status != 'Quero Ler')
-                            const PopupMenuItem(
-                                value: 'Quero Ler',
-                                child: Text('Mover para Quero Ler')),
-                          if (status != 'Lendo')
-                            const PopupMenuItem(
-                                value: 'Lendo', child: Text('Mover para Lendo')),
-                          if (status != 'Lidos')
-                            const PopupMenuItem(
-                                value: 'Lidos', child: Text('Mover para Lidos')),
+                          if (status != 'Quero Ler') const PopupMenuItem(value: 'Quero Ler', child: Text('Mover para Quero Ler')),
+                          if (status != 'Lendo') const PopupMenuItem(value: 'Lendo', child: Text('Mover para Lendo')),
+                          if (status != 'Lidos') const PopupMenuItem(value: 'Lidos', child: Text('Mover para Lidos')),
                           const PopupMenuDivider(),
-                          const PopupMenuItem(
-                            value: 'REMOVER',
-                            child: Row(
-                              children: [
-                                Icon(Icons.delete_outline, color: Colors.red, size: 20),
-                                SizedBox(width: 8),
-                                Text('Remover da Estante', style: TextStyle(color: Colors.red)),
-                              ],
-                            ),
-                          ),
+                          const PopupMenuItem(value: 'REMOVER', child: Text('Remover', style: TextStyle(color: Colors.red))),
                         ],
                       ),
                     ),
@@ -423,26 +271,33 @@ class ShelfList extends StatelessWidget {
                         ),
                       ),
                     const SizedBox(height: 8),
+                    // BOTÕES DE AÇÃO INFERIORES
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        ElevatedButton.icon(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFAB47BC),
-                            foregroundColor: Colors.white,
+                        // Botão exclusivo de Data de Leitura (aparece nos Lidos)
+                        if (status == 'Lidos') ...[
+                          OutlinedButton.icon(
+                            onPressed: () => _showFinishedDateDialog(context, userId, book),
+                            icon: const Icon(Icons.calendar_today, size: 14, color: Color(0xFF8E24AA)),
+                            label: const Text('Data', style: TextStyle(color: Color(0xFF8E24AA), fontSize: 12)),
                           ),
+                          const SizedBox(width: 8),
+                        ],
+                        // Botão de Editar Páginas (Disponível em todas as estantes)
+                        OutlinedButton.icon(
+                          onPressed: () => _showUpdatePagesDialog(context, userId, book),
+                          icon: const Icon(Icons.edit, size: 14, color: Color(0xFF8E24AA)),
+                          label: const Text('Páginas', style: TextStyle(color: Color(0xFF8E24AA), fontSize: 12)),
+                        ),
+                        const SizedBox(width: 8),
+                        // Botão de LER (Prévia)
+                        ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFAB47BC), foregroundColor: Colors.white),
                           onPressed: () => _openBookReader(context, book.previewLink),
                           icon: const Icon(Icons.chrome_reader_mode, size: 16),
                           label: const Text('LER'),
                         ),
-                        const SizedBox(width: 8),
-                        OutlinedButton.icon(
-                          onPressed: () => _showUpdatePagesDialog(
-                              context, userId, book),
-                          icon: const Icon(Icons.edit, size: 16, color: Color(0xFF8E24AA)),
-                          label: const Text('Páginas', style: TextStyle(color: Color(0xFF8E24AA))),
-                        ),
-                        const SizedBox(width: 8),
                       ],
                     )
                   ],

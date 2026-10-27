@@ -12,6 +12,9 @@ class DatabaseService {
         .collection('books')
         .doc(book.id)
         .set(book.toFirestore(), SetOptions(merge: true));
+
+    // Recalcula estatísticas após adicionar
+    await recalculateStats(userId);
   }
 
   // Mover de Estante
@@ -34,13 +37,17 @@ class DatabaseService {
       'updatedAt': DateTime.now().toIso8601String(),
     };
 
-    // Se mudou para Lidos, marca as páginas lidas como total do livro
+    // Se mudou para Lidos, marca as páginas lidas como total do livro e define a data padrão do mês atual
     if (newStatus == 'Lidos') {
       updateData['pagesRead'] = pageCount;
+      final agora = DateTime.now();
+      updateData['finishedDate'] = "${agora.year}-${agora.month.toString().padLeft(2, '0')}-01";
     }
 
     await docRef.update(updateData);
 
+    // Recalcula estatísticas após mover
+    await recalculateStats(userId);
   }
 
   // Atualizar Detalhes do Livro (Total de Páginas)
@@ -55,20 +62,27 @@ class DatabaseService {
       'pageCount': newPageCount,
       'updatedAt': DateTime.now().toIso8601String(),
     });
+
+    await recalculateStats(userId);
   }
 
-  // Atualizar Páginas Lidas
+  // Atualizar Páginas Lidas (Com registro do mês/ano atual para estatísticas dinâmicas)
   Future<void> updatePagesRead(
       String userId, String bookId, int pagesRead, int totalPages) async {
     final bool isCompleted = pagesRead >= totalPages && totalPages > 0;
+    
+    final agora = DateTime.now();
+    final anoMesAtual = "${agora.year}-${agora.month.toString().padLeft(2, '0')}-01";
 
     Map<String, dynamic> dataToUpdate = {
       'pagesRead': pagesRead,
+      'lastReadMonth': anoMesAtual,
       'updatedAt': DateTime.now().toIso8601String(),
     };
 
     if (isCompleted) {
       dataToUpdate['status'] = 'Lidos';
+      dataToUpdate['finishedDate'] = anoMesAtual;
     }
 
     await _db
@@ -78,6 +92,25 @@ class DatabaseService {
         .doc(bookId)
         .update(dataToUpdate);
 
+    // Recalcula estatísticas após ler páginas
+    await recalculateStats(userId);
+  }
+
+  // Atualizar Data de Término Específica (Ano e Mês escolhidos pelo usuário)
+  Future<void> updateBookFinishedDate(
+      String userId, String bookId, String finishedDate) async {
+    await _db
+        .collection('users')
+        .doc(userId)
+        .collection('books')
+        .doc(bookId)
+        .update({
+      'finishedDate': finishedDate,
+      'status': 'Lidos',
+      'updatedAt': DateTime.now().toIso8601String(),
+    });
+
+    await recalculateStats(userId);
   }
 
   // Remover Livro da Estante do Usuário
@@ -89,6 +122,42 @@ class DatabaseService {
         .doc(bookId)
         .delete();
 
+    // Recalcula as estatísticas após remover o livro
+    await recalculateStats(userId);
+  }
+
+  // Recalcular Estatísticas Gerais do Usuário no Firestore
+  Future<void> recalculateStats(String userId) async {
+    final booksQuery = await _db
+        .collection('users')
+        .doc(userId)
+        .collection('books')
+        .get();
+
+    int totalLivrosLidos = 0;
+    int totalPaginasLidas = 0;
+
+    for (var doc in booksQuery.docs) {
+      final data = doc.data();
+      final status = data['status'] ?? '';
+      final pagesRead = (data['pagesRead'] as num?)?.toInt() ?? 0;
+
+      totalPaginasLidas += pagesRead;
+      if (status == 'Lidos') {
+        totalLivrosLidos++;
+      }
+    }
+
+    await _db
+        .collection('users')
+        .doc(userId)
+        .collection('stats')
+        .doc('general')
+        .set({
+      'livrosLidos': totalLivrosLidos,
+      'paginasLidas': totalPaginasLidas,
+      'updatedAt': DateTime.now().toIso8601String(),
+    }, SetOptions(merge: true));
   }
 
   // Streams de Leitura

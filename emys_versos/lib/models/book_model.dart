@@ -2,56 +2,39 @@ class BookModel {
   final String id;
   final String title;
   final List<String> authors;
-  final String? description;
+  final String description;
   final int pageCount;
-  final int pagesRead; // Campo novo para progresso
+  final int pagesRead;
+  final String status;
   final String? thumbnailUrl;
-  final String status; // 'Quero Ler', 'Lendo', 'Lidos'
-  final String? previewLink; // Link para leitura/prévia
+  final String? previewLink;
+  final String? finishedDate; // Novo campo: formato "YYYY-MM-DD"
 
-// Construtor
   BookModel({
     required this.id,
     required this.title,
     required this.authors,
-    this.description,
+    required this.description,
     required this.pageCount,
-    this.pagesRead = 0,
+    required this.pagesRead,
+    required this.status,
     this.thumbnailUrl,
-    this.status = 'Quero Ler',
     this.previewLink,
+    this.finishedDate,
   });
 
-  factory BookModel.fromApiJson(Map<String, dynamic> json) {
-    final volumeInfo = json['volumeInfo'] ?? {};
-    final imageLinks = volumeInfo['imageLinks'] ?? {};
-
+  factory BookModel.fromFirestore(Map<String, dynamic> data, String id) {
     return BookModel(
-      id: json['id'] ?? '',
-      title: volumeInfo['title'] ?? 'Título desconhecido',
-      authors: (volumeInfo['authors'] as List<dynamic>?)
-              ?.map((e) => e.toString())
-              .toList() ??
-          ['Autor desconhecido'],
-      description: volumeInfo['description'],
-      pageCount: volumeInfo['pageCount'] ?? 0,
-      pagesRead: 0,
-      thumbnailUrl: imageLinks['thumbnail']?.replaceAll('http://', 'https://'),
-      previewLink: volumeInfo['previewLink'] ?? volumeInfo['infoLink'],
-    );
-  }
-
-  factory BookModel.fromFirestore(Map<String, dynamic> json, String docId) {
-    return BookModel(
-      id: docId,
-      title: json['title'] ?? '',
-      authors: List<String>.from(json['authors'] ?? []),
-      description: json['description'],
-      pageCount: json['pageCount'] ?? 0,
-      pagesRead: json['pagesRead'] ?? 0,
-      thumbnailUrl: json['thumbnailUrl'],
-      status: json['status'] ?? 'Quero Ler',
-      previewLink: json['previewLink'],
+      id: id,
+      title: data['title'] ?? '',
+      authors: List<String>.from(data['authors'] ?? ['Desconhecido']),
+      description: data['description'] ?? '',
+      pageCount: (data['pageCount'] as num?)?.toInt() ?? 200,
+      pagesRead: (data['pagesRead'] as num?)?.toInt() ?? 0,
+      status: data['status'] ?? 'Quero Ler',
+      thumbnailUrl: data['thumbnailUrl'],
+      previewLink: data['previewLink'],
+      finishedDate: data['finishedDate'],
     );
   }
 
@@ -62,10 +45,35 @@ class BookModel {
       'description': description,
       'pageCount': pageCount,
       'pagesRead': pagesRead,
-      'thumbnailUrl': thumbnailUrl,
       'status': status,
+      'thumbnailUrl': thumbnailUrl,
       'previewLink': previewLink,
-      'updatedAt': DateTime.now().toIso8601String(),
+      'finishedDate': finishedDate,
     };
+  }
+
+  static BookModel fromApiJson(Map<String, dynamic> item) {
+    final volumeInfo = item['volumeInfo'] as Map<String, dynamic>? ?? {};
+    final imageLinks = volumeInfo['imageLinks'] as Map<String, dynamic>? ?? {};
+    final rawAuthors = volumeInfo['authors'] as List<dynamic>?;
+
+    return BookModel(
+      id: item['id'] as String? ?? '',
+      title: volumeInfo['title'] as String? ?? 'Título desconhecido',
+      authors:
+          rawAuthors?.map((author) => author.toString()).toList() ??
+          ['Autor desconhecido'],
+      description: volumeInfo['description'] as String? ?? '',
+      pageCount: (volumeInfo['pageCount'] as num?)?.toInt() ?? 0,
+      pagesRead: 0,
+      status: 'Quero Ler',
+      thumbnailUrl: (imageLinks['thumbnail'] as String?)?.replaceFirst(
+        'http://',
+        'https://',
+      ),
+      previewLink:
+          volumeInfo['previewLink'] as String? ??
+          volumeInfo['infoLink'] as String?,
+    );
   }
 }

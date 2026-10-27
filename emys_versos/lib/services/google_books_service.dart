@@ -95,6 +95,8 @@ class GoogleBooksService {
           authors: authors,
           description: 'Livro disponibilizado via Open Library.',
           pageCount: (book['number_of_pages_median'] as num?)?.toInt() ?? 0,
+          pagesRead: 0,
+          status: 'Quero Ler',
           thumbnailUrl: coverId == null
               ? null
               : 'https://covers.openlibrary.org/b/id/$coverId-M.jpg',
